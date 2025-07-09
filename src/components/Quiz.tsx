@@ -53,8 +53,19 @@ export function Quiz() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4">
+      {/* Header with Home Button */}
+      <div className="max-w-4xl mx-auto mb-8">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white/50 transition-all duration-200"
+        >
+          <Home className="w-5 h-5" />
+          Back to Home
+        </button>
+      </div>
+
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
+        {/* Rest of the quiz content */}
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Discover Your Investing Archetype
@@ -129,27 +140,18 @@ export function Quiz() {
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <button
-              onClick={() => navigate('/')}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
-            >
-              <Home className="w-5 h-5" />
-              Home
-            </button>
-            <button
-              onClick={previousQuestion}
-              disabled={!canGoPrevious()}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                canGoPrevious()
-                  ? 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  : 'text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              <ChevronLeft className="w-5 h-5" />
-              Previous
-            </button>
-          </div>
+          <button
+            onClick={previousQuestion}
+            disabled={!canGoPrevious()}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+              canGoPrevious()
+                ? 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                : 'text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Previous
+          </button>
 
           <div className="flex gap-2">
             {Array.from({ length: 5 }, (_, i) => (
