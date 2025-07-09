@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { Trophy, Target, TrendingUp, Award, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export function Dashboard() {
+  const [isLoading, setIsLoading] = useState(true);
+
   // Mock data - will be replaced with real data from backend
   const portfolioData = {
     totalValue: 25000,
@@ -24,6 +27,32 @@ export function Dashboard() {
       { name: 'Energy', value: 15, color: '#10b981' },
     ],
   };
+
+  // Simulate data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 flex items-center justify-center p-8">
+        <div className="text-center space-y-4">
+          <div className="w-20 h-20 mx-auto">
+            <motion.div
+              className="w-full h-full rounded-full border-4 border-blue-500 border-t-transparent"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
+          <h2 className="text-2xl font-bold text-white">Loading Your Dashboard</h2>
+          <p className="text-blue-200">Preparing your fantasy investing experience...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 p-8">
@@ -50,10 +79,11 @@ export function Dashboard() {
               <span>XP Progress</span>
               <span>{portfolioData.xp} / {portfolioData.xpToNextLevel}</span>
             </div>
-            <div className="w-full h-3 bg-white/20 rounded-full">
+            <div className="w-full h-3 bg-white/20 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${(portfolioData.xp / portfolioData.xpToNextLevel) * 100}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
                 className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500"
               />
             </div>
@@ -62,12 +92,18 @@ export function Dashboard() {
           {/* Badges */}
           <div>
             <h3 className="text-lg font-semibold mb-3">Badges Earned</h3>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {portfolioData.badges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1">
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1"
+                >
                   <Award className="w-4 h-4" />
                   <span className="text-sm">{badge}</span>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -85,9 +121,14 @@ export function Dashboard() {
             Portfolio Value
           </h2>
           
-          <div className="text-4xl font-bold mb-4">
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl font-bold mb-4"
+          >
             ${portfolioData.totalValue.toLocaleString()}
-          </div>
+          </motion.div>
 
           <div className={`text-lg ${portfolioData.dayChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {portfolioData.dayChange >= 0 ? '+' : ''}{portfolioData.dayChange.toLocaleString()} 
@@ -105,6 +146,7 @@ export function Dashboard() {
                   cy="50%"
                   outerRadius={80}
                   innerRadius={60}
+                  animationDuration={1000}
                 >
                   {portfolioData.allocation.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -128,15 +170,26 @@ export function Dashboard() {
           </h2>
 
           <div className="space-y-4">
-            {portfolioData.dailyChallenges.map((challenge) => (
-              <div
+            {portfolioData.dailyChallenges.map((challenge, index) => (
+              <motion.div
                 key={challenge.id}
-                className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                initial={{ x: 50, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: index * 0.1 }}
+                className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center
                     ${challenge.completed ? 'border-green-400 bg-green-400/20' : 'border-white/30'}`}>
-                    {challenge.completed && <Star className="w-4 h-4 text-green-400" />}
+                    {challenge.completed && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring" }}
+                      >
+                        <Star className="w-4 h-4 text-green-400" />
+                      </motion.div>
+                    )}
                   </div>
                   <span>{challenge.title}</span>
                 </div>
@@ -144,7 +197,7 @@ export function Dashboard() {
                   <Trophy className="w-4 h-4" />
                   <span>{challenge.xp} XP</span>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
