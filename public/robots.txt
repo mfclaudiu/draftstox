@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# Important pages
+Allow: /quiz
+Allow: /privacy
+Allow: /terms
+
+# Sitemap location
+Sitemap: https://draftstox.com/sitemap.xml
+
+# Crawl delay (optional - helps with server load)
+Crawl-delay: 1
+
+# Block admin/private areas (if any in future)
+# Disallow: /admin/
+# Disallow: /api/
+
+# Allow social media bots
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: / 

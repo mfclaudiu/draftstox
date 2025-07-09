@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage -->
+  <url>
+    <loc>https://draftstox.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2024-01-01</lastmod>
+    <image:image>
+      <image:loc>https://draftstox.com/og-image.png</image:loc>
+      <image:title>DraftStox - Learn Investing Through Play</image:title>
+      <image:caption>Fantasy-style investing education platform</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Quiz Page -->
+  <url>
+    <loc>https://draftstox.com/quiz</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2024-01-01</lastmod>
+    <image:image>
+      <image:loc>https://draftstox.com/quiz-preview.png</image:loc>
+      <image:title>Investment Archetype Quiz</image:title>
+      <image:caption>Discover your investing personality in 2 minutes</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://draftstox.com/privacy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+    <lastmod>2024-01-01</lastmod>
+  </url>
+
+  <url>
+    <loc>https://draftstox.com/terms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+    <lastmod>2024-01-01</lastmod>
+  </url>
+
+  <!-- Future pages (when implemented) -->
+  <!--
+  <url>
+    <loc>https://draftstox.com/dashboard</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://draftstox.com/leaderboard</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://draftstox.com/portfolio</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  -->
+
+</urlset> 
