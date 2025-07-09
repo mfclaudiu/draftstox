@@ -5,6 +5,7 @@ import { User, TrendingUp, Award, Users, Settings, Home } from 'lucide-react';
 import { Portfolio, Position, LeaderboardEntry, Badge } from '../types';
 import { gamificationService, LevelInfo } from '../services/gamification';
 import { PortfolioVisualizer } from '../components/PortfolioVisualizer';
+import { useNavigate } from 'react-router-dom';
 
 // Mock data - in a real app, this would come from your backend
 const MOCK_USER = {
@@ -358,6 +359,51 @@ function ProfileTab({ user, levelInfo }: { user: typeof MOCK_USER; levelInfo: Le
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState('portfolio');
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Simulate loading delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 to-blue-900 flex flex-col items-center justify-center p-4">
+        <div className="text-center space-y-6">
+          <div className="w-24 h-24 text-cyan-400 mx-auto animate-pulse">
+            <svg viewBox="0 0 24 24" fill="none" className="w-full h-full">
+              <path
+                d="M3 13.2L8.5 19L21 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="animate-draw"
+              />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-white">Setting Up Your Dashboard</h2>
+          <p className="text-lg text-blue-200">
+            Preparing your personalized fantasy investing experience...
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium bg-white/10 text-white hover:bg-white/20 transition-all duration-200"
+            >
+              <Home className="w-5 h-5" />
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const [portfolio, setPortfolio] = useState<Portfolio>(MOCK_PORTFOLIO);
   const [user] = useState(MOCK_USER);
   const [levelInfo, setLevelInfo] = useState<LevelInfo>(gamificationService.getLevelInfo(MOCK_USER.totalXP));

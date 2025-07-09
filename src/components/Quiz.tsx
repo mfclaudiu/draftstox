@@ -1,10 +1,12 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, Loader } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuiz } from '../contexts/QuizContext';
 import { QuizResult } from './QuizResult';
+import { useNavigate } from 'react-router-dom';
 
 export function Quiz() {
+  const navigate = useNavigate();
   const {
     state,
     answerQuestion,
@@ -127,18 +129,27 @@ export function Quiz() {
 
         {/* Navigation */}
         <div className="flex justify-between items-center">
-          <button
-            onClick={previousQuestion}
-            disabled={!canGoPrevious()}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-              canGoPrevious()
-                ? 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                : 'text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-            Previous
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+            >
+              <Home className="w-5 h-5" />
+              Home
+            </button>
+            <button
+              onClick={previousQuestion}
+              disabled={!canGoPrevious()}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                canGoPrevious()
+                  ? 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                  : 'text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+              Previous
+            </button>
+          </div>
 
           <div className="flex gap-2">
             {Array.from({ length: 5 }, (_, i) => (
