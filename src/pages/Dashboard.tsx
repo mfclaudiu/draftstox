@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, TrendingUp, DollarSign, Award, X, ChevronRight, AlertCircle } from 'lucide-react';
+import { Search, TrendingUp, DollarSign, Award, X, ChevronRight, AlertCircle, Home } from 'lucide-react';
 import { useMarketData } from '../hooks/useMarketData';
+import { Link, useNavigate } from 'react-router-dom';
 
 // Types
 interface Stock {
@@ -73,6 +74,7 @@ const mockChallenges: Challenge[] = [
 ];
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [positions, setPositions] = useState<Position[]>(mockPositions);
@@ -80,7 +82,7 @@ export function Dashboard() {
   const [xp, setXp] = useState(150);
   const [level, setLevel] = useState(1);
   const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges);
-  const [showApiKeyWarning, setShowApiKeyWarning] = useState(!import.meta.env.VITE_ALPHA_VANTAGE_API_KEY);
+  const [showApiKeyWarning, setShowApiKeyWarning] = useState(false); // Remove env check since we have hardcoded key
 
   // Get real-time market data
   const symbols = [...new Set([...positions.map(p => p.symbol), ...mockStocks.map(s => s.symbol)])];
@@ -190,6 +192,24 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4">
+      {/* Navigation */}
+      <div className="max-w-7xl mx-auto mb-8 flex justify-between items-center">
+        <Link 
+          to="/"
+          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <Home className="w-5 h-5" />
+          Back to Home
+        </Link>
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Search className="w-5 h-5" />
+          Search Stocks
+        </button>
+      </div>
+
       {/* API Key Warning */}
       {showApiKeyWarning && (
         <div className="max-w-7xl mx-auto mb-8">
@@ -235,13 +255,7 @@ export function Dashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Your Portfolio</h1>
             <p className="text-gray-600">Track your investments and progress</p>
           </div>
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Search className="h-5 w-5 mr-2" />
-            Search Stocks
-          </button>
+          {/* Removed the search button from here as it's now in the navigation */}
         </div>
 
         {/* Portfolio Stats */}

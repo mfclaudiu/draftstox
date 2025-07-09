@@ -12,23 +12,46 @@ interface ConvertKitResponse {
 
 export class EmailService {
   private static readonly BASE_URL = 'https://api.convertkit.com/v3';
-  private formId: string;
-  private apiKey: string;
-
-  constructor() {
-    this.formId = import.meta.env.VITE_CONVERTKIT_FORM_ID || '';
-    this.apiKey = import.meta.env.VITE_CONVERTKIT_API_KEY || '';
-  }
+  private formId = '5266853'; // Your ConvertKit form ID
+  private apiKey = 'xBHJ4g9SEmwF7jDwsqVvgg'; // Your ConvertKit API key
 
   async subscribe(data: EmailSignup): Promise<{ success: boolean; message?: string }> {
-    // Always use fallback mode for preview
-    console.log('Preview mode: Simulating email signup', data);
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
-    return { success: true };
+    try {
+      const response = await fetch(`${EmailService.BASE_URL}/forms/${this.formId}/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          api_key: this.apiKey,
+          email: data.email,
+          first_name: data.name,
+        }),
+      });
+
+      const result: ConvertKitResponse = await response.json();
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      if (result.subscription) {
+        this.trackEmailSignup(data.email);
+        return { success: true };
+      }
+
+      return { success: false, message: 'Failed to subscribe. Please try again.' };
+    } catch (error) {
+      console.error('Email subscription error:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Failed to subscribe. Please try again.'
+      };
+    }
   }
 
   private trackEmailSignup(email: string) {
-    // Mock tracking for preview
+    // Analytics tracking
     console.log('Tracking signup:', email);
   }
 }
