@@ -1,7 +1,7 @@
 import { MarketData } from '../types';
 
 // API Configuration
-const ALPHA_VANTAGE_API_KEY = import.meta.env.VITE_ALPHA_VANTAGE_API_KEY || '';
+const ALPHA_VANTAGE_API_KEY = 'IYO1SVB4RLCUX2CZ';
 const ALPHA_VANTAGE_BASE_URL = 'https://www.alphavantage.co/query';
 
 // Yahoo Finance Alternative API (free tier)
