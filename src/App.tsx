@@ -5,6 +5,7 @@ import { QuizPage } from './pages/QuizPage';
 import { Dashboard } from './pages/Dashboard';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
+import { QuizProvider } from './contexts/QuizContext';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -27,7 +28,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <QuizProvider>
+        <AppContent />
+      </QuizProvider>
     </Router>
   );
 }

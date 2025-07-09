@@ -1,9 +1,9 @@
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Trophy, Target, TrendingUp, Award, Star, Plus, Search, ArrowRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Search, TrendingUp, DollarSign, Award, X, ChevronRight, AlertCircle } from 'lucide-react';
+import { useMarketData } from '../hooks/useMarketData';
 
+// Types
 interface Stock {
   symbol: string;
   name: string;
@@ -17,9 +17,6 @@ interface Position {
   shares: number;
   avgPrice: number;
   currentPrice: number;
-  totalValue: number;
-  gain: number;
-  gainPercent: number;
 }
 
 interface Challenge {
@@ -32,460 +29,515 @@ interface Challenge {
   total?: number;
 }
 
+// Mock data
+const mockStocks: Stock[] = [
+  { symbol: 'AAPL', name: 'Apple Inc.', price: 173.50, change: 2.30, changePercent: 1.34 },
+  { symbol: 'MSFT', name: 'Microsoft Corp.', price: 338.11, change: 4.20, changePercent: 1.26 },
+  { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 131.86, change: -0.54, changePercent: -0.41 },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 127.12, change: 1.86, changePercent: 1.48 },
+  { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 431.73, change: 8.92, changePercent: 2.11 },
+];
+
+const mockPositions: Position[] = [
+  { symbol: 'AAPL', shares: 10, avgPrice: 170.25, currentPrice: 173.50 },
+  { symbol: 'MSFT', shares: 5, avgPrice: 330.50, currentPrice: 338.11 },
+  { symbol: 'GOOGL', shares: 8, avgPrice: 130.75, currentPrice: 131.86 },
+];
+
+const mockChallenges: Challenge[] = [
+  {
+    id: 1,
+    title: 'First Trade',
+    description: 'Make your first trade',
+    xpReward: 50,
+    completed: true,
+  },
+  {
+    id: 2,
+    title: 'Portfolio Builder',
+    description: 'Invest $50,000 of your virtual cash',
+    xpReward: 100,
+    completed: false,
+    progress: 35000,
+    total: 50000,
+  },
+  {
+    id: 3,
+    title: 'Diversification Master',
+    description: 'Own stocks from 5 different sectors',
+    xpReward: 150,
+    completed: false,
+    progress: 3,
+    total: 5,
+  },
+];
+
 export function Dashboard() {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [positions, setPositions] = useState<Position[]>([]);
-  const [availableCash, setAvailableCash] = useState(100000); // Start with $100k
-  const [searchResults, setSearchResults] = useState<Stock[]>([]);
-  const [showTradeModal, setShowTradeModal] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
-  const [tradeAmount, setTradeAmount] = useState('');
-  const [xp, setXp] = useState(0);
+  const [positions, setPositions] = useState<Position[]>(mockPositions);
+  const [cash, setCash] = useState(100000);
+  const [xp, setXp] = useState(150);
   const [level, setLevel] = useState(1);
-  const [challenges, setChallenges] = useState<Challenge[]>([
-    {
-      id: 1,
-      title: 'Diversification Master',
-      description: 'Hold positions in 5 different sectors',
-      xpReward: 500,
-      completed: false,
-      progress: 0,
-      total: 5
-    },
-    {
-      id: 2,
-      title: 'First Trade',
-      description: 'Make your first stock purchase',
-      xpReward: 100,
-      completed: false
-    },
-    {
-      id: 3,
-      title: 'Portfolio Builder',
-      description: 'Invest at least $50,000',
-      xpReward: 300,
-      completed: false,
-      progress: 0,
-      total: 50000
-    }
-  ]);
+  const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges);
+  const [showApiKeyWarning, setShowApiKeyWarning] = useState(!import.meta.env.VITE_ALPHA_VANTAGE_API_KEY);
 
-  // Simulate real-time stock updates
+  // Get real-time market data
+  const symbols = [...new Set([...positions.map(p => p.symbol), ...mockStocks.map(s => s.symbol)])];
+  const { data: marketData, loading: marketDataLoading, error: marketDataError } = useMarketData(symbols);
+
+  // Update positions with real-time prices
   useEffect(() => {
-    const updateStocks = () => {
-      setPositions(prev => prev.map(pos => {
-        const priceChange = (Math.random() - 0.5) * 2; // Random price movement
-        const newPrice = pos.currentPrice * (1 + priceChange / 100);
-        const newValue = newPrice * pos.shares;
-        const newGain = newValue - (pos.avgPrice * pos.shares);
-        const newGainPercent = (newGain / (pos.avgPrice * pos.shares)) * 100;
-        
-        return {
-          ...pos,
-          currentPrice: newPrice,
-          totalValue: newValue,
-          gain: newGain,
-          gainPercent: newGainPercent
-        };
-      }));
-    };
+    if (marketData && Object.keys(marketData).length > 0) {
+      setPositions(currentPositions =>
+        currentPositions.map(position => ({
+          ...position,
+          currentPrice: marketData[position.symbol]?.price || position.currentPrice
+        }))
+      );
+    }
+  }, [marketData]);
 
-    const interval = setInterval(updateStocks, 5000); // Update every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
+  // Calculate portfolio value
+  const portfolioValue = positions.reduce((total, pos) => total + pos.shares * pos.currentPrice, 0);
+  const totalValue = portfolioValue + cash;
 
-  // Calculate total portfolio value
-  const totalPortfolioValue = positions.reduce((sum, pos) => sum + pos.totalValue, 0) + availableCash;
+  // Calculate XP progress
+  const xpForNextLevel = 1000;
+  const xpProgress = (xp % xpForNextLevel) / xpForNextLevel * 100;
 
-  // Search stocks function
-  const searchStocks = async (term: string) => {
-    // Simulate API call with mock data
-    const mockStocks: Stock[] = [
-      { symbol: 'AAPL', name: 'Apple Inc.', price: 175.25, change: 2.50, changePercent: 1.45 },
-      { symbol: 'MSFT', name: 'Microsoft Corp.', price: 325.50, change: -1.20, changePercent: -0.37 },
-      { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 135.75, change: 1.75, changePercent: 1.31 },
-      { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 128.90, change: 0.90, changePercent: 0.70 },
-      { symbol: 'TSLA', name: 'Tesla Inc.', price: 245.30, change: -3.20, changePercent: -1.29 },
-    ].filter(stock => 
-      stock.symbol.toLowerCase().includes(term.toLowerCase()) ||
-      stock.name.toLowerCase().includes(term.toLowerCase())
-    );
+  useEffect(() => {
+    // Update level based on XP (1000 XP per level)
+    setLevel(Math.floor(xp / 1000) + 1);
+  }, [xp]);
+
+  const handleTrade = (stock: Stock, shares: number, isBuy: boolean) => {
+    const cost = stock.price * shares;
     
-    setSearchResults(mockStocks);
-  };
-
-  // Execute trade function
-  const executeTrade = (stock: Stock, shares: number) => {
-    const tradeValue = stock.price * shares;
-    
-    if (tradeValue > availableCash) {
+    if (isBuy && cost > cash) {
       alert('Insufficient funds!');
       return;
     }
 
     const existingPosition = positions.find(p => p.symbol === stock.symbol);
-    
-    if (existingPosition) {
-      // Update existing position
-      setPositions(prev => prev.map(pos => 
-        pos.symbol === stock.symbol
-          ? {
-              ...pos,
-              shares: pos.shares + shares,
-              avgPrice: (pos.avgPrice * pos.shares + stock.price * shares) / (pos.shares + shares),
-              totalValue: (pos.shares + shares) * stock.price,
-            }
-          : pos
-      ));
+    let newPositions: Position[];
+
+    if (isBuy) {
+      if (existingPosition) {
+        // Update existing position
+        newPositions = positions.map(p => 
+          p.symbol === stock.symbol
+            ? {
+                ...p,
+                shares: p.shares + shares,
+                avgPrice: (p.avgPrice * p.shares + cost) / (p.shares + shares),
+              }
+            : p
+        );
+      } else {
+        // Create new position
+        newPositions = [...positions, {
+          symbol: stock.symbol,
+          shares,
+          avgPrice: stock.price,
+          currentPrice: stock.price,
+        }];
+      }
+      setCash(prev => prev - cost);
     } else {
-      // Create new position
-      setPositions(prev => [...prev, {
-        symbol: stock.symbol,
-        shares,
-        avgPrice: stock.price,
-        currentPrice: stock.price,
-        totalValue: shares * stock.price,
-        gain: 0,
-        gainPercent: 0
-      }]);
+      if (!existingPosition || existingPosition.shares < shares) {
+        alert('Insufficient shares!');
+        return;
+      }
+
+      if (existingPosition.shares === shares) {
+        // Remove position
+        newPositions = positions.filter(p => p.symbol !== stock.symbol);
+      } else {
+        // Update position
+        newPositions = positions.map(p =>
+          p.symbol === stock.symbol
+            ? { ...p, shares: p.shares - shares }
+            : p
+        );
+      }
+      setCash(prev => prev + cost);
     }
 
-    // Update cash balance
-    setAvailableCash(prev => prev - tradeValue);
+    setPositions(newPositions);
+    setXp(prev => prev + 50); // 50 XP per trade
 
     // Update challenges
-    if (positions.length === 0) {
-      completeChallenge(2); // First Trade challenge
-    }
-
-    const investedAmount = totalPortfolioValue - availableCash;
-    updateChallengeProgress(3, investedAmount);
-
-    // Add XP for the trade
-    addXp(50); // 50 XP per trade
-  };
-
-  // Challenge management
-  const completeChallenge = (challengeId: number) => {
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId
-        ? { ...challenge, completed: true }
-        : challenge
-    ));
-    const challenge = challenges.find(c => c.id === challengeId);
-    if (challenge) {
-      addXp(challenge.xpReward);
-    }
-  };
-
-  const updateChallengeProgress = (challengeId: number, progress: number) => {
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId
-        ? { 
-            ...challenge, 
-            progress,
-            completed: progress >= (challenge.total || 0)
-          }
-        : challenge
-    ));
-  };
-
-  // XP and leveling system
-  const addXp = (amount: number) => {
-    setXp(prev => {
-      const newXp = prev + amount;
-      const newLevel = Math.floor(newXp / 1000) + 1; // Level up every 1000 XP
-      if (newLevel > level) {
-        setLevel(newLevel);
-        // Show level up animation/notification here
+    const updatedChallenges = challenges.map(challenge => {
+      if (challenge.id === 1 && !challenge.completed) {
+        // First Trade challenge
+        return { ...challenge, completed: true };
       }
-      return newXp;
+      if (challenge.id === 2) {
+        // Portfolio Builder challenge
+        const invested = totalValue - 100000; // Initial cash was 100k
+        return {
+          ...challenge,
+          progress: invested,
+          completed: invested >= 50000,
+        };
+      }
+      // Add more challenge updates here
+      return challenge;
     });
+    setChallenges(updatedChallenges);
   };
-
-  useEffect(() => {
-    // Simulate initial data loading
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 flex items-center justify-center p-8">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 mx-auto">
-            <motion.div
-              className="w-full h-full rounded-full border-4 border-blue-500 border-t-transparent"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            />
-          </div>
-          <h2 className="text-2xl font-bold text-white">Loading Your Dashboard</h2>
-          <p className="text-blue-200">Preparing your fantasy investing experience...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900 p-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Player Stats Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 text-white"
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
-              <Trophy className="w-8 h-8" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">Level {level}</h2>
-              <p className="text-blue-200">Investment Master</p>
-            </div>
-          </div>
-
-          {/* XP Progress */}
-          <div className="mb-6">
-            <div className="flex justify-between text-sm mb-2">
-              <span>XP Progress</span>
-              <span>{xp} / {level * 1000}</span>
-            </div>
-            <div className="w-full h-3 bg-white/20 rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${(xp % 1000) / 10}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Portfolio Summary */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Portfolio Summary</h3>
-            <div className="bg-white/5 rounded-xl p-4">
-              <div className="flex justify-between mb-2">
-                <span>Total Value</span>
-                <span className="font-bold">${totalPortfolioValue.toLocaleString()}</span>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4">
+      {/* API Key Warning */}
+      {showApiKeyWarning && (
+        <div className="max-w-7xl mx-auto mb-8">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <AlertCircle className="h-5 w-5 text-yellow-400" />
               </div>
-              <div className="flex justify-between">
-                <span>Available Cash</span>
-                <span className="font-bold">${availableCash.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Trade */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3">Quick Trade</h3>
-            <div className="relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  searchStocks(e.target.value);
-                }}
-                placeholder="Search stocks..."
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:border-blue-500"
-              />
-              <Search className="absolute right-3 top-2.5 w-5 h-5 text-white/50" />
-            </div>
-            {searchTerm && (
-              <div className="mt-2 bg-white/5 rounded-xl overflow-hidden">
-                {searchResults.map((stock) => (
-                  <button
-                    key={stock.symbol}
-                    onClick={() => {
-                      setSelectedStock(stock);
-                      setShowTradeModal(true);
-                    }}
-                    className="w-full flex items-center justify-between p-3 hover:bg-white/10 transition-colors"
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  Alpha Vantage API key not found. Using mock data for demonstration. Get your API key at{' '}
+                  <a
+                    href="https://www.alphavantage.co/support/#api-key"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium underline hover:text-yellow-600"
                   >
-                    <div>
-                      <div className="font-bold">{stock.symbol}</div>
-                      <div className="text-sm text-white/70">{stock.name}</div>
-                    </div>
-                    <div className="text-right">
-                      <div>${stock.price}</div>
-                      <div className={stock.change >= 0 ? 'text-green-400' : 'text-red-400'}>
-                        {stock.change >= 0 ? '+' : ''}{stock.changePercent}%
-                      </div>
-                    </div>
+                    alphavantage.co
+                  </a>
+                  {' '}and add it to your .env file as VITE_ALPHA_VANTAGE_API_KEY.
+                </p>
+              </div>
+              <div className="ml-auto pl-3">
+                <div className="-mx-1.5 -my-1.5">
+                  <button
+                    onClick={() => setShowApiKeyWarning(false)}
+                    className="inline-flex rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 focus:ring-offset-yellow-50"
+                  >
+                    <span className="sr-only">Dismiss</span>
+                    <X className="h-5 w-5" />
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Portfolio Positions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 text-white"
-        >
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <TrendingUp className="w-6 h-6" />
-            Your Positions
-          </h2>
-
-          <div className="space-y-4">
-            {positions.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-white/70 mb-4">No positions yet. Start trading to build your portfolio!</p>
-                <button
-                  onClick={() => setShowTradeModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                  Start Trading
-                </button>
-              </div>
-            ) : (
-              positions.map((position) => (
-                <motion.div
-                  key={position.symbol}
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-white/5 rounded-xl p-4"
-                >
-                  <div className="flex justify-between mb-2">
-                    <div>
-                      <div className="font-bold">{position.symbol}</div>
-                      <div className="text-sm text-white/70">{position.shares} shares</div>
-                    </div>
-                    <div className="text-right">
-                      <div>${position.totalValue.toLocaleString()}</div>
-                      <div className={position.gain >= 0 ? 'text-green-400' : 'text-red-400'}>
-                        {position.gain >= 0 ? '+' : ''}{position.gainPercent.toFixed(2)}%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-sm text-white/70">
-                    <span>Avg Price: ${position.avgPrice.toFixed(2)}</span>
-                    <span>Current: ${position.currentPrice.toFixed(2)}</span>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </div>
-        </motion.div>
-
-        {/* Daily Challenges */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 text-white"
-        >
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-            <Target className="w-6 h-6" />
-            Challenges
-          </h2>
-
-          <div className="space-y-4">
-            {challenges.map((challenge) => (
-              <motion.div
-                key={challenge.id}
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center
-                    ${challenge.completed ? 'border-green-400 bg-green-400/20' : 'border-white/30'}`}>
-                    {challenge.completed && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring" }}
-                      >
-                        <Star className="w-4 h-4 text-green-400" />
-                      </motion.div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="font-medium">{challenge.title}</div>
-                    <div className="text-sm text-white/70">{challenge.description}</div>
-                    {challenge.progress !== undefined && (
-                      <div className="mt-2 w-full bg-white/10 rounded-full h-1.5">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(challenge.progress / (challenge.total || 1)) * 100}%` }}
-                          className="h-full rounded-full bg-blue-500"
-                        />
-                      </div>
-                    )}
-                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-blue-200">
-                  <Trophy className="w-4 h-4" />
-                  <span>{challenge.xpReward} XP</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Trade Modal */}
-      {showTradeModal && selectedStock && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white/10 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full"
-          >
-            <h3 className="text-2xl font-bold text-white mb-4">Trade {selectedStock.symbol}</h3>
-            <div className="mb-4">
-              <div className="flex justify-between text-white/70 mb-2">
-                <span>Current Price</span>
-                <span>${selectedStock.price}</span>
-              </div>
-              <div className="flex justify-between text-white/70 mb-4">
-                <span>Available Cash</span>
-                <span>${availableCash.toLocaleString()}</span>
-              </div>
-              <input
-                type="number"
-                value={tradeAmount}
-                onChange={(e) => setTradeAmount(e.target.value)}
-                placeholder="Enter number of shares..."
-                className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:border-blue-500 mb-2"
-              />
-              <div className="text-right text-white/70">
-                Total: ${(parseFloat(tradeAmount) || 0 * selectedStock.price).toLocaleString()}
               </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowTradeModal(false)}
-                className="flex-1 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  const shares = parseInt(tradeAmount);
-                  if (shares > 0) {
-                    executeTrade(selectedStock, shares);
-                    setShowTradeModal(false);
-                    setTradeAmount('');
-                  }
-                }}
-                className="flex-1 px-4 py-2 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-              >
-                Buy
-              </button>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Your Portfolio</h1>
+            <p className="text-gray-600">Track your investments and progress</p>
+          </div>
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Search className="h-5 w-5 mr-2" />
+            Search Stocks
+          </button>
+        </div>
+
+        {/* Portfolio Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl shadow-md p-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Total Value</h2>
+              <DollarSign className="h-5 w-5 text-green-500" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-gray-900">
+              ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <span>Available Cash: ${cash.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
             </div>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-xl shadow-md p-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Portfolio</h2>
+              <TrendingUp className="h-5 w-5 text-blue-500" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-gray-900">
+              ${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <span>{positions.length} Positions</span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-xl shadow-md p-6"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Experience</h2>
+              <Award className="h-5 w-5 text-purple-500" />
+            </div>
+            <p className="mt-2 text-3xl font-bold text-gray-900">Level {level}</p>
+            <div className="mt-2">
+              <div className="flex items-center text-sm text-gray-500">
+                <span>{xp % xpForNextLevel} / {xpForNextLevel} XP</span>
+              </div>
+              <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-purple-500 rounded-full h-2 transition-all duration-300"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Portfolio Section */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Positions</h2>
+              {positions.length > 0 ? (
+                <div className="space-y-4">
+                  {positions.map((position) => {
+                    const stock = mockStocks.find(s => s.symbol === position.symbol);
+                    if (!stock) return null;
+
+                    const value = position.shares * position.currentPrice;
+                    const gain = value - (position.shares * position.avgPrice);
+                    const gainPercent = (gain / (position.shares * position.avgPrice)) * 100;
+
+                    return (
+                      <motion.div
+                        key={position.symbol}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div>
+                          <h3 className="font-medium text-gray-900">{position.symbol}</h3>
+                          <p className="text-sm text-gray-500">{stock.name}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">
+                            {position.shares} shares @ ${position.avgPrice.toFixed(2)}
+                          </p>
+                          <p className={`text-sm ${gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            ${gain.toFixed(2)} ({gainPercent.toFixed(2)}%)
+                          </p>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No positions yet. Start trading to build your portfolio!</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Challenges Section */}
+          <div>
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Challenges</h2>
+              <div className="space-y-4">
+                {challenges.map((challenge) => (
+                  <motion.div
+                    key={challenge.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="p-4 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-medium text-gray-900">{challenge.title}</h3>
+                        <p className="text-sm text-gray-500">{challenge.description}</p>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-purple-600">{challenge.xpReward} XP</span>
+                        {challenge.completed && (
+                          <Award className="ml-2 h-5 w-5 text-purple-500" />
+                        )}
+                      </div>
+                    </div>
+                    {challenge.progress !== undefined && challenge.total !== undefined && (
+                      <div className="mt-2">
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span>Progress</span>
+                          <span>{challenge.progress} / {challenge.total}</span>
+                        </div>
+                        <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-purple-500 rounded-full h-2 transition-all duration-300"
+                            style={{ width: `${(challenge.progress / challenge.total) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stock Search Modal */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity"
+              onClick={() => setSearchOpen(false)}
+            >
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+            >
+              <div className="absolute top-0 right-0 pt-4 pr-4">
+                <button
+                  onClick={() => setSearchOpen(false)}
+                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Search Stocks</h3>
+                <div className="space-y-4">
+                  {mockStocks.map((stock) => {
+                    const marketPrice = marketData[stock.symbol]?.price;
+                    const marketChange = marketData[stock.symbol]?.change;
+                    const marketChangePercent = marketData[stock.symbol]?.changePercent;
+
+                    return (
+                      <motion.button
+                        key={stock.symbol}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        onClick={() => {
+                          setSelectedStock({
+                            ...stock,
+                            price: marketPrice || stock.price,
+                            change: marketChange || stock.change,
+                            changePercent: marketChangePercent || stock.changePercent,
+                          });
+                          setSearchOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="text-left">
+                          <h4 className="font-medium text-gray-900">{stock.symbol}</h4>
+                          <p className="text-sm text-gray-500">{stock.name}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">
+                            ${(marketPrice || stock.price).toFixed(2)}
+                          </p>
+                          <p className={`text-sm ${(marketChange || stock.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {(marketChange || stock.change) >= 0 ? '+' : ''}
+                            {(marketChange || stock.change).toFixed(2)} (
+                            {(marketChangePercent || stock.changePercent).toFixed(2)}%)
+                          </p>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )}
+
+      {/* Trade Modal */}
+      {selectedStock && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity"
+              onClick={() => setSelectedStock(null)}
+            >
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
+            >
+              <div className="absolute top-0 right-0 pt-4 pr-4">
+                <button
+                  onClick={() => setSelectedStock(null)}
+                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Trade {selectedStock.symbol}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-500">{selectedStock.name}</p>
+                    <p className="text-2xl font-bold text-gray-900">${selectedStock.price.toFixed(2)}</p>
+                    <p className={`text-sm ${selectedStock.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {selectedStock.change >= 0 ? '+' : ''}{selectedStock.change.toFixed(2)} ({selectedStock.changePercent.toFixed(2)}%)
+                    </p>
+                  </div>
+
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => {
+                        const shares = parseInt(prompt('How many shares to buy?') || '0');
+                        if (shares > 0) {
+                          handleTrade(selectedStock, shares, true);
+                          setSelectedStock(null);
+                        }
+                      }}
+                      className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                    >
+                      Buy
+                    </button>
+                    <button
+                      onClick={() => {
+                        const shares = parseInt(prompt('How many shares to sell?') || '0');
+                        if (shares > 0) {
+                          handleTrade(selectedStock, shares, false);
+                          setSelectedStock(null);
+                        }
+                      }}
+                      className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+                    >
+                      Sell
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       )}
     </div>
