@@ -4,6 +4,7 @@ import { PortfolioBuilder } from '../components/PortfolioBuilder';
 import { User, TrendingUp, Award, Users, Settings, Home } from 'lucide-react';
 import { Portfolio, Position, LeaderboardEntry, Badge } from '../types';
 import { gamificationService, LevelInfo } from '../services/gamification';
+import { PortfolioVisualizer } from '../components/PortfolioVisualizer';
 
 // Mock data - in a real app, this would come from your backend
 const MOCK_USER = {
@@ -106,7 +107,13 @@ function PortfolioTab({ portfolio, onUpdatePortfolio, onAddPosition, onRemovePos
   onRemovePosition: (positionId: string) => void;
 }) {
   return (
-    <div>
+    <div className="space-y-8">
+      <PortfolioVisualizer
+        portfolio={portfolio}
+        userLevel={2}
+        userXP={1250}
+        dailyStreak={3}
+      />
       <PortfolioBuilder
         portfolio={portfolio}
         onUpdatePortfolio={onUpdatePortfolio}

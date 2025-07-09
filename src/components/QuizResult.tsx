@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Share2, RefreshCw, ArrowRight, Shield, Scale, TrendingUp, Zap } from 'lucide-react';
+import { Share2, RefreshCw, ArrowRight, Shield, Scale, TrendingUp, Zap, Home } from 'lucide-react';
 import { QuizResult as QuizResultType } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 interface QuizResultProps {
   result: QuizResultType;
@@ -23,6 +24,7 @@ const colorMap = {
 };
 
 export function QuizResult({ result, onRestart }: QuizResultProps) {
+  const navigate = useNavigate();
   const IconComponent = iconMap[result.archetype.icon as keyof typeof iconMap] || Shield;
   const gradientColor = colorMap[result.archetype.color as keyof typeof colorMap] || colorMap.blue;
 
@@ -157,6 +159,14 @@ export function QuizResult({ result, onRestart }: QuizResultProps) {
           transition={{ delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
+          <button
+            onClick={() => navigate('/')}
+            className="bg-white text-gray-700 border-2 border-gray-300 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-200 flex items-center gap-2"
+          >
+            <Home className="w-5 h-5" />
+            Back to Home
+          </button>
+
           <button
             onClick={handleShare}
             className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2"
