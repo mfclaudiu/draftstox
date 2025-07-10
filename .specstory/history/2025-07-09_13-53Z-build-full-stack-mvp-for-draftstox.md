@@ -26060,25 +26060,171 @@ but ar eyou aking sure this is dfifferent from the othe quiz?  really look into 
 
 _**Assistant**_
 
-
-
----
-
-
+You're absolutely right to question this! Let me investigate if the Quiz Preview section is actually different from the main quiz, or if it's just showing the same quiz.
 
 ---
 
-
-
----
-
-
+Read file: src/components/QuizTeaser.tsx
 
 ---
 
-
+Now let me check what the actual quiz looks like:
 
 ---
+
+<details>
+            <summary>Searched codebase "What questions are in the actual quiz page that users see when they click the CTA buttons?" • **0** results</summary>
+        
+No results found
+</details>
+
+---
+
+Read file: src/constants/quiz.ts
+
+---
+
+Read file: src/pages/QuizPage.tsx
+
+---
+
+Read file: src/components/Quiz.tsx
+
+---
+
+Now I need to see how the actual quiz gets its questions. Let me check the QuizContext:
+
+---
+
+Read file: src/contexts/QuizContext.tsx
+
+---
+
+Now I need to see the actual questions being used in the quiz:
+
+---
+
+Read file: src/contexts/QuizContext.tsx
+
+---
+
+**FOUND THE ISSUE!** You're absolutely right to question this. Looking at the data:
+
+**Quiz Preview Questions (in QuizTeaser.tsx):**
+1. "How do you feel when your investments lose value?" 
+2. "What's your investment timeline?"
+3. "How much of your portfolio would you put in high-risk investments?"
+
+**Actual Quiz Questions (in QuizContext.tsx):**
+1. "How do you feel about investment risk?"
+2. "How long do you plan to hold your investments?" 
+3. "How do you approach investment research?"
+4. "What's your primary investment goal?"
+5. "How do you view market opportunities?"
+
+**The problems:**
+1. **Different questions**: The preview shows different questions than the actual quiz
+2. **Different wording**: Even similar concepts are worded differently
+3. **Missing questions**: The preview only shows 3 questions, but the actual quiz has 5
+4. **Misleading**: Users think they're getting a "preview" but it's actually completely different content
+
+According to the client brief, the Quiz Preview should show **"2-3 sample questions with multiple choice visuals"** and then have a CTA button. But it should be actual sample questions from the real quiz, not different ones!
+
+Let me fix this by making the QuizTeaser show actual sample questions from the real quiz:
+
+---
+
+```diff
+    const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
+  
++   // Sample questions from the actual quiz (first 3 questions)
+    const sampleQuestions = [
+      {
+-       question: "How do you feel when your investments lose value?",
+-       options: ["Panic and sell immediately", "Feel anxious but hold", "Stay calm and analyze", "See it as a buying opportunity"]
++       question: "How do you feel about investment risk?",
++       options: ["I prefer stability and minimal risk", "I can handle some ups and downs", "I'm comfortable with significant volatility", "I seek maximum returns regardless of risk"]
+      },
+      {
+-       question: "What's your investment timeline?",
+-       options: ["Less than 1 year", "1-5 years", "5-10 years", "10+ years"]
++       question: "How long do you plan to hold your investments?",
++       options: ["Less than 1 year", "1-5 years", "5-10 years", "More than 10 years"]
+      },
+      {
+-       question: "How much of your portfolio would you put in high-risk investments?",
+-       options: ["0-10%", "10-25%", "25-50%", "50%+"]
++       question: "How do you approach investment research?",
++       options: ["I analyze company financials and business models", "I study price patterns and market trends", "I prefer index funds and ETFs", "I use a combination of approaches"]
+      }
+    ];
+```
+
+---
+
+Perfect! Now the Quiz Preview section shows the actual first 3 questions from the real quiz, making it a true preview instead of misleading different questions. 
+
+Let me commit this important fix:
+
+---
+
+```bash
+git add .
+```
+
+```
+PS C:\Users\mfcla\Desktop\cursor work\draft-stox> git add .
+PS C:\Users\mfcla\Desktop\cursor work\draft-stox>
+```
+
+---
+
+Cancelled
+
+---
+
+_**User**_
+
+you got stuck again 
+
+---
+
+_**Assistant**_
+
+```bash
+git push
+```
+
+```
+PS C:\Users\mfcla\Desktop\cursor work\draft-stox> git push
+Enumerating objects: 15, done.
+Counting objects: 100% (15/15), done.
+Total 8 (delta 5), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (5/5), completed with 5 local objects.
+To https://github.com/mfclaudiu/draftstox.git
+   4dcfaa8..04115a3  main -> main
+PS C:\Users\mfcla\Desktop\cursor work\draft-stox>
+```
+
+---
+
+✅ **Done!** 
+
+**Critical fix pushed:** The Quiz Preview section now shows the actual first 3 questions from the real DraftDNA Quiz instead of completely different misleading questions. 
+
+You were absolutely right to question this - it was a major UX issue where users thought they were previewing the quiz but were actually seeing different content entirely. Now it's a true preview that builds trust and sets proper expectations.
+
+The site will redeploy with this fix in about 1-2 minutes!
+
+---
+
+_**User**_
+
+when i click the fucking draft quiz it takes me to these fucking same questions as the quiz in the hero, you need to make do something wtf
+
+---
+
+_**Assistant**_
 
 
 

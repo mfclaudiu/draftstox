@@ -8,19 +8,19 @@ interface QuizTeaserProps {
 export function QuizTeaser({ onStartQuiz }: QuizTeaserProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
 
-  // Sample questions from the actual quiz (first 3 questions)
+  // Sample questions that represent the quiz style but are different from actual quiz
   const sampleQuestions = [
     {
-      question: "How do you feel about investment risk?",
-      options: ["I prefer stability and minimal risk", "I can handle some ups and downs", "I'm comfortable with significant volatility", "I seek maximum returns regardless of risk"]
+      question: "How do you feel when your investments lose value?",
+      options: ["Panic and sell immediately", "Feel anxious but hold", "Stay calm and analyze", "See it as a buying opportunity"]
     },
     {
-      question: "How long do you plan to hold your investments?",
-      options: ["Less than 1 year", "1-5 years", "5-10 years", "More than 10 years"]
+      question: "What's your investment timeline?",
+      options: ["Less than 1 year", "1-5 years", "5-10 years", "10+ years"]
     },
     {
-      question: "How do you approach investment research?",
-      options: ["I analyze company financials and business models", "I study price patterns and market trends", "I prefer index funds and ETFs", "I use a combination of approaches"]
+      question: "How much of your portfolio would you put in high-risk investments?",
+      options: ["0-10%", "10-25%", "25-50%", "50%+"]
     }
   ];
 
@@ -35,13 +35,22 @@ export function QuizTeaser({ onStartQuiz }: QuizTeaserProps) {
     <section className="py-16 lg:py-24 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.h2 
-          className="font-poppins font-bold text-3xl lg:text-4xl text-gray-900 mb-12"
+          className="font-poppins font-bold text-3xl lg:text-4xl text-gray-900 mb-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
           Quick Preview Questions
         </motion.h2>
+        
+        <motion.p 
+          className="font-montserrat text-lg text-gray-600 mb-12 max-w-2xl mx-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          Get a taste of what the DraftDNA Quiz will ask. These sample questions show the style — the real quiz has deeper, more personalized questions to find your perfect investor archetype.
+        </motion.p>
         
         <div className="space-y-8 mb-12">
           {sampleQuestions.map((item, questionIndex) => (
