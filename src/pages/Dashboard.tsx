@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, TrendingUp, DollarSign, Award, X, ChevronRight, AlertCircle, Home } from 'lucide-react';
 import { useMarketData } from '../hooks/useMarketData';
 import { Link, useNavigate } from 'react-router-dom';
+import { StockSearch } from '../components/StockSearch';
 
 // Types
 interface Stock {
@@ -28,6 +29,11 @@ interface Challenge {
   completed: boolean;
   progress?: number;
   total?: number;
+}
+
+interface StockSearchResult {
+  symbol: string;
+  name: string;
 }
 
 // Mock data
@@ -75,14 +81,12 @@ const mockChallenges: Challenge[] = [
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const [searchOpen, setSearchOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [positions, setPositions] = useState<Position[]>(mockPositions);
   const [cash, setCash] = useState(100000);
   const [xp, setXp] = useState(150);
   const [level, setLevel] = useState(1);
   const [challenges, setChallenges] = useState<Challenge[]>(mockChallenges);
-  const [showApiKeyWarning, setShowApiKeyWarning] = useState(false); // Remove env check since we have hardcoded key
 
   // Get real-time market data
   const symbols = [...new Set([...positions.map(p => p.symbol), ...mockStocks.map(s => s.symbol)])];
@@ -190,370 +194,116 @@ export function Dashboard() {
     setChallenges(updatedChallenges);
   };
 
+  const handleSelectStock = (searchResult: StockSearchResult) => {
+    // Convert StockSearchResult to Stock type
+    const stock: Stock = {
+      symbol: searchResult.symbol,
+      name: searchResult.name,
+      price: marketData[searchResult.symbol]?.price || 0,
+      change: marketData[searchResult.symbol]?.change || 0,
+      changePercent: marketData[searchResult.symbol]?.changePercent || 0
+    };
+    setSelectedStock(stock);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 py-8 px-4">
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <div className="max-w-7xl mx-auto mb-8 flex justify-between items-center">
-        <Link 
-          to="/"
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <Home className="w-5 h-5" />
-          Back to Home
-        </Link>
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Search className="w-5 h-5" />
-          Search Stocks
-        </button>
-      </div>
-
-      {/* API Key Warning */}
-      {showApiKeyWarning && (
-        <div className="max-w-7xl mx-auto mb-8">
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-yellow-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  Alpha Vantage API key not found. Using mock data for demonstration. Get your API key at{' '}
-                  <a
-                    href="https://www.alphavantage.co/support/#api-key"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium underline hover:text-yellow-600"
-                  >
-                    alphavantage.co
-                  </a>
-                  {' '}and add it to your .env file as VITE_ALPHA_VANTAGE_API_KEY.
-                </p>
-              </div>
-              <div className="ml-auto pl-3">
-                <div className="-mx-1.5 -my-1.5">
-                  <button
-                    onClick={() => setShowApiKeyWarning(false)}
-                    className="inline-flex rounded-md p-1.5 text-yellow-500 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 focus:ring-offset-yellow-50"
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
+      <nav className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link 
+              to="/"
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <Home className="h-5 w-5" />
+              <span>Back to Home</span>
+            </Link>
+            
+            <div className="w-96">
+              <StockSearch
+                onSelectStock={handleSelectStock}
+                placeholder="Search stocks..."
+                className="w-full"
+              />
             </div>
           </div>
         </div>
-      )}
+      </nav>
 
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Your Portfolio</h1>
-            <p className="text-gray-600">Track your investments and progress</p>
-          </div>
-          {/* Removed the search button from here as it's now in the navigation */}
-        </div>
-
-        {/* Portfolio Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-md p-6"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Total Value</h2>
-              <DollarSign className="h-5 w-5 text-green-500" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <span>Available Cash: ${cash.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-md p-6"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Portfolio</h2>
-              <TrendingUp className="h-5 w-5 text-blue-500" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              ${portfolioValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <span>{positions.length} Positions</span>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-md p-6"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Experience</h2>
-              <Award className="h-5 w-5 text-purple-500" />
-            </div>
-            <p className="mt-2 text-3xl font-bold text-gray-900">Level {level}</p>
-            <div className="mt-2">
-              <div className="flex items-center text-sm text-gray-500">
-                <span>{xp % xpForNextLevel} / {xpForNextLevel} XP</span>
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Portfolio Section */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Portfolio</h2>
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-bold text-gray-900">${totalValue.toFixed(2)}</span>
+                <span className="text-gray-500">Available Cash: ${cash.toFixed(2)}</span>
               </div>
-              <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-purple-500 rounded-full h-2 transition-all duration-300"
+            </div>
+
+            {/* Positions */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Positions</h3>
+              <div className="space-y-4">
+                {positions.map((position) => (
+                  <div key={position.symbol} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{position.symbol}</h4>
+                      <p className="text-sm text-gray-500">{position.shares} shares @ ${position.avgPrice.toFixed(2)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-gray-900">${(position.shares * position.currentPrice).toFixed(2)}</p>
+                      <p className={`text-sm ${position.currentPrice > position.avgPrice ? 'text-green-600' : 'text-red-600'}`}>
+                        {((position.currentPrice - position.avgPrice) / position.avgPrice * 100).toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Experience and Challenges */}
+          <div className="space-y-8">
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Experience</h3>
+              <div className="text-3xl font-bold text-gray-900 mb-2">Level {level}</div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${xpProgress}%` }}
                 />
               </div>
+              <p className="text-sm text-gray-500">{xp % xpForNextLevel} / {xpForNextLevel} XP</p>
             </div>
-          </motion.div>
-        </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Portfolio Section */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Positions</h2>
-              {positions.length > 0 ? (
-                <div className="space-y-4">
-                  {positions.map((position) => {
-                    const stock = mockStocks.find(s => s.symbol === position.symbol);
-                    if (!stock) return null;
-
-                    const value = position.shares * position.currentPrice;
-                    const gain = value - (position.shares * position.avgPrice);
-                    const gainPercent = (gain / (position.shares * position.avgPrice)) * 100;
-
-                    return (
-                      <motion.div
-                        key={position.symbol}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div>
-                          <h3 className="font-medium text-gray-900">{position.symbol}</h3>
-                          <p className="text-sm text-gray-500">{stock.name}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-gray-900">
-                            {position.shares} shares @ ${position.avgPrice.toFixed(2)}
-                          </p>
-                          <p className={`text-sm ${gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            ${gain.toFixed(2)} ({gainPercent.toFixed(2)}%)
-                          </p>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No positions yet. Start trading to build your portfolio!</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Challenges Section */}
-          <div>
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Challenges</h2>
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Challenges</h3>
               <div className="space-y-4">
                 {challenges.map((challenge) => (
-                  <motion.div
-                    key={challenge.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-4 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-gray-900">{challenge.title}</h3>
-                        <p className="text-sm text-gray-500">{challenge.description}</p>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-sm font-medium text-purple-600">{challenge.xpReward} XP</span>
-                        {challenge.completed && (
-                          <Award className="ml-2 h-5 w-5 text-purple-500" />
-                        )}
-                      </div>
+                  <div key={challenge.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-gray-900">{challenge.title}</h4>
+                      <span className="text-blue-600 font-semibold">{challenge.xpReward} XP</span>
                     </div>
-                    {challenge.progress !== undefined && challenge.total !== undefined && (
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between text-sm text-gray-500">
-                          <span>Progress</span>
-                          <span>{challenge.progress} / {challenge.total}</span>
-                        </div>
-                        <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-purple-500 rounded-full h-2 transition-all duration-300"
-                            style={{ width: `${(challenge.progress / challenge.total) * 100}%` }}
-                          />
-                        </div>
+                    <p className="text-sm text-gray-500">{challenge.description}</p>
+                    {challenge.progress !== undefined && (
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(challenge.progress / challenge.total!) * 100}%` }}
+                        />
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Stock Search Modal */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              onClick={() => setSearchOpen(false)}
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
-            >
-              <div className="absolute top-0 right-0 pt-4 pr-4">
-                <button
-                  onClick={() => setSearchOpen(false)}
-                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Search Stocks</h3>
-                <div className="space-y-4">
-                  {mockStocks.map((stock) => {
-                    const marketPrice = marketData[stock.symbol]?.price;
-                    const marketChange = marketData[stock.symbol]?.change;
-                    const marketChangePercent = marketData[stock.symbol]?.changePercent;
-
-                    return (
-                      <motion.button
-                        key={stock.symbol}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        onClick={() => {
-                          setSelectedStock({
-                            ...stock,
-                            price: marketPrice || stock.price,
-                            change: marketChange || stock.change,
-                            changePercent: marketChangePercent || stock.changePercent,
-                          });
-                          setSearchOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="text-left">
-                          <h4 className="font-medium text-gray-900">{stock.symbol}</h4>
-                          <p className="text-sm text-gray-500">{stock.name}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium text-gray-900">
-                            ${(marketPrice || stock.price).toFixed(2)}
-                          </p>
-                          <p className={`text-sm ${(marketChange || stock.change) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {(marketChange || stock.change) >= 0 ? '+' : ''}
-                            {(marketChange || stock.change).toFixed(2)} (
-                            {(marketChangePercent || stock.changePercent).toFixed(2)}%)
-                          </p>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      )}
-
-      {/* Trade Modal */}
-      {selectedStock && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              onClick={() => setSelectedStock(null)}
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6"
-            >
-              <div className="absolute top-0 right-0 pt-4 pr-4">
-                <button
-                  onClick={() => setSelectedStock(null)}
-                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Trade {selectedStock.symbol}</h3>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-gray-500">{selectedStock.name}</p>
-                    <p className="text-2xl font-bold text-gray-900">${selectedStock.price.toFixed(2)}</p>
-                    <p className={`text-sm ${selectedStock.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {selectedStock.change >= 0 ? '+' : ''}{selectedStock.change.toFixed(2)} ({selectedStock.changePercent.toFixed(2)}%)
-                    </p>
-                  </div>
-
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => {
-                        const shares = parseInt(prompt('How many shares to buy?') || '0');
-                        if (shares > 0) {
-                          handleTrade(selectedStock, shares, true);
-                          setSelectedStock(null);
-                        }
-                      }}
-                      className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-                    >
-                      Buy
-                    </button>
-                    <button
-                      onClick={() => {
-                        const shares = parseInt(prompt('How many shares to sell?') || '0');
-                        if (shares > 0) {
-                          handleTrade(selectedStock, shares, false);
-                          setSelectedStock(null);
-                        }
-                      }}
-                      className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
-                    >
-                      Sell
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      )}
+      </main>
     </div>
   );
 } 

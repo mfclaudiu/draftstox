@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mailchimp form styles */
+#mc_embed_signup .helper_text {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: #4A5568;
+  margin-top: 0.25rem;
+}
+
+#mc_embed_signup div.response {
+  margin: 1rem 0;
+  padding: 0.5rem;
+  font-weight: bold;
+  border-radius: 0.5rem;
+  width: 100%;
+  text-align: center;
+}
+
+#mc_embed_signup #mce-error-response {
+  background: #FEE2E2;
+  border: 1px solid #EF4444;
+  color: #B91C1C;
+}
+
+#mc_embed_signup #mce-success-response {
+  background: #DCFCE7;
+  border: 1px solid #22C55E;
+  color: #15803D;
+}
+
+/* Our custom animations */
 @keyframes draw {
   from {
     stroke-dashoffset: 100;
