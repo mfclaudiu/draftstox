@@ -8,8 +8,8 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-6 md:mb-0">
-            <h3 className="text-2xl font-bold mb-2">DraftStox</h3>
-            <p className="text-gray-400">Invest like it's a game. Because it is.</p>
+            <h3 className="font-poppins text-2xl font-bold mb-2">DraftStox</h3>
+            <p className="font-montserrat text-gray-400">Invest like it's a game. Because it is.</p>
           </div>
           
           <div className="flex space-x-6">
@@ -26,17 +26,19 @@ export function Footer() {
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
-          <p>&copy; 2025 DraftStox. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link to="/privacy" className="hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="hover:text-white transition-colors">
-              Terms of Service
-            </Link>
+          <p className="font-montserrat">&copy; 2025 DraftStox. All rights reserved.</p>
+          <div className="flex space-x-6 mt-4 md:mt-0 font-montserrat">
             <a href="mailto:hello@draftstox.com" className="hover:text-white transition-colors">
               Contact
             </a>
+            <Link to="/privacy" className="hover:text-white transition-colors">
+              Privacy
+            </Link>
+            <div className="flex space-x-4">
+              <span className="text-gray-500">Social:</span>
+              <a href="https://twitter.com/draftstox" className="hover:text-white transition-colors">Twitter</a>
+              <a href="https://linkedin.com/company/draftstox" className="hover:text-white transition-colors">LinkedIn</a>
+            </div>
           </div>
         </div>
       </div>
