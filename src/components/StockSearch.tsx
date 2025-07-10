@@ -1,26 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, TrendingUp, X } from 'lucide-react';
 import { marketDataService, StockSearchResult } from '../services/marketData';
+import { useNavigate } from 'react-router-dom';
 
 interface StockSearchProps {
-  onSelectStock: (stock: StockSearchResult) => void;
+  onSelectStock?: (stock: StockSearchResult) => void;
   placeholder?: string;
   className?: string;
 }
 
 export function StockSearch({ onSelectStock, placeholder = "Search stocks...", className = "" }: StockSearchProps) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<StockSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [popularStocks, setPopularStocks] = useState<StockSearchResult[]>([]);
+  const [popularStocks] = useState<StockSearchResult[]>([
+    { symbol: 'AAPL', name: 'Apple Inc.', type: 'Equity', region: 'United States', currency: 'USD' },
+    { symbol: 'MSFT', name: 'Microsoft Corporation', type: 'Equity', region: 'United States', currency: 'USD' },
+    { symbol: 'GOOGL', name: 'Alphabet Inc.', type: 'Equity', region: 'United States', currency: 'USD' },
+    { symbol: 'AMZN', name: 'Amazon.com Inc.', type: 'Equity', region: 'United States', currency: 'USD' },
+    { symbol: 'META', name: 'Meta Platforms Inc.', type: 'Equity', region: 'United States', currency: 'USD' },
+    { symbol: 'TSLA', name: 'Tesla Inc.', type: 'Equity', region: 'United States', currency: 'USD' }
+  ]);
+  
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Load popular stocks on mount
-  useEffect(() => {
-    loadPopularStocks();
-  }, []);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -57,26 +62,6 @@ export function StockSearch({ onSelectStock, placeholder = "Search stocks...", c
     return () => clearTimeout(searchTimer);
   }, [query]);
 
-  const loadPopularStocks = async () => {
-    try {
-      const popular = marketDataService.getPopularStocks();
-      const stockData = await Promise.all(
-        popular.slice(0, 6).map(async (symbol) => ({
-          symbol,
-          name: symbol,
-          type: 'Equity',
-          region: 'United States',
-          timezone: 'UTC-04',
-          currency: 'USD',
-          matchScore: 1.0,
-        }))
-      );
-      setPopularStocks(stockData);
-    } catch (error) {
-      console.error('Error loading popular stocks:', error);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
@@ -84,7 +69,12 @@ export function StockSearch({ onSelectStock, placeholder = "Search stocks...", c
   };
 
   const handleSelectStock = (stock: StockSearchResult) => {
-    onSelectStock(stock);
+    if (onSelectStock) {
+      onSelectStock(stock);
+    } else {
+      // If no onSelectStock provided, navigate to portfolio builder with selected stock
+      navigate('/dashboard', { state: { selectedStock: stock } });
+    }
     setQuery('');
     setIsOpen(false);
     setResults([]);
@@ -180,12 +170,6 @@ export function StockSearch({ onSelectStock, placeholder = "Search stocks...", c
                         </p>
                       )}
                     </div>
-                    
-                    {stock.matchScore && query.trim() && (
-                      <div className="ml-4 text-xs text-gray-400">
-                        {Math.round(stock.matchScore * 100)}% match
-                      </div>
-                    )}
                   </div>
                 </button>
               ))}

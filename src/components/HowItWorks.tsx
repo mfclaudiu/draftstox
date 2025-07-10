@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Trophy, GamepadIcon, ChevronRight, X, ArrowRight } from 'lucide-react';
+import { Target, Trophy, GamepadIcon, ChevronRight, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Step {
@@ -9,7 +9,6 @@ interface Step {
   icon: React.ReactNode;
   gradient: string;
   details: string[];
-  color: string;
 }
 
 const steps: Step[] = [
@@ -19,7 +18,6 @@ const steps: Step[] = [
     description: 'Discover your investing archetype with our personalized quiz. Are you a cautious saver or bold risk-taker?',
     icon: <Target className="w-10 h-10 text-white" />,
     gradient: 'from-blue-500 to-indigo-600',
-    color: 'blue',
     details: [
       '5 thoughtful questions about your risk tolerance',
       'Smart branching logic adapts to your answers',
@@ -33,7 +31,6 @@ const steps: Step[] = [
     description: 'Create your fantasy investment portfolio with virtual money. Experiment with stocks, ETFs, and crypto safely.',
     icon: <GamepadIcon className="w-10 h-10 text-white" />,
     gradient: 'from-cyan-500 to-blue-500',
-    color: 'cyan',
     details: [
       'Start with $100,000 in virtual currency',
       'Choose from real stocks, ETFs, and crypto',
@@ -47,7 +44,6 @@ const steps: Step[] = [
     description: 'Compete with friends, earn DraftPoints, and unlock achievements as you master investing strategies.',
     icon: <Trophy className="w-10 h-10 text-white" />,
     gradient: 'from-orange-500 to-pink-500',
-    color: 'orange',
     details: [
       'Daily and weekly leaderboards',
       'Earn XP for smart investment decisions',
@@ -89,36 +85,30 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <motion.div 
               key={step.id} 
-              className="relative"
+              className="relative h-full"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
             >
-              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
                 <div 
-                  className={`bg-gradient-to-r ${step.gradient} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-110 transition-all duration-300 shadow-lg`}
-                  onClick={() => setSelectedStep(step.id)}
+                  className={`bg-gradient-to-r ${step.gradient} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-all duration-300 shadow-lg`}
                 >
                   {step.icon}
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-                  <span className={`w-8 h-8 rounded-full bg-${step.color}-100 text-${step.color}-600 flex items-center justify-center text-sm font-semibold`}>
-                    {step.id}
-                  </span>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">
                   {step.title}
                 </h3>
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                <p className="text-gray-600 text-lg leading-relaxed mb-6 flex-grow">
                   {step.description}
                 </p>
-                <motion.button
+                <button
                   onClick={() => setSelectedStep(step.id)}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-${step.color}-50 text-${step.color}-600 hover:bg-${step.color}-100 transition-colors duration-200 font-medium`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
                 >
                   Learn more
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </motion.div>
           ))}
@@ -157,7 +147,6 @@ export function HowItWorks() {
                           <h3 className="text-3xl font-bold text-gray-900">
                             {step.title}
                           </h3>
-                          <p className={`text-${step.color}-600 font-medium`}>Step {step.id} of 3</p>
                         </div>
                       </div>
                       <button
@@ -173,8 +162,7 @@ export function HowItWorks() {
                     </p>
                     
                     <div className="space-y-6">
-                      <h4 className="font-semibold text-gray-900 text-xl flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full bg-${step.color}-500`}></span>
+                      <h4 className="font-semibold text-gray-900 text-xl">
                         What you'll get:
                       </h4>
                       <div className="grid gap-4">
@@ -184,9 +172,9 @@ export function HowItWorks() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className={`flex items-start gap-4 p-4 rounded-xl bg-${step.color}-50`}
+                            className="flex items-start gap-4 p-4 rounded-xl bg-blue-50"
                           >
-                            <div className={`w-1.5 h-1.5 rounded-full bg-${step.color}-500 mt-2`}></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
                             <span className="text-gray-700">{detail}</span>
                           </motion.div>
                         ))}
