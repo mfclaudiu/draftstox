@@ -8,18 +8,19 @@ interface QuizTeaserProps {
 export function QuizTeaser({ onStartQuiz }: QuizTeaserProps) {
   const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
 
+  // Sample questions from the actual quiz (first 3 questions)
   const sampleQuestions = [
     {
-      question: "How do you feel when your investments lose value?",
-      options: ["Panic and sell immediately", "Feel anxious but hold", "Stay calm and analyze", "See it as a buying opportunity"]
+      question: "How do you feel about investment risk?",
+      options: ["I prefer stability and minimal risk", "I can handle some ups and downs", "I'm comfortable with significant volatility", "I seek maximum returns regardless of risk"]
     },
     {
-      question: "What's your investment timeline?",
-      options: ["Less than 1 year", "1-5 years", "5-10 years", "10+ years"]
+      question: "How long do you plan to hold your investments?",
+      options: ["Less than 1 year", "1-5 years", "5-10 years", "More than 10 years"]
     },
     {
-      question: "How much of your portfolio would you put in high-risk investments?",
-      options: ["0-10%", "10-25%", "25-50%", "50%+"]
+      question: "How do you approach investment research?",
+      options: ["I analyze company financials and business models", "I study price patterns and market trends", "I prefer index funds and ETFs", "I use a combination of approaches"]
     }
   ];
 
