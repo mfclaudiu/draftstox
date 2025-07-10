@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, Target, TrendingUp, Trophy, Users, FileText } from 'lucide-react';
+import { ChevronRight, Target, TrendingUp, Trophy, Users, FileText, BarChart3 } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { QuizTeaser } from '../components/QuizTeaser';
 import { EmailForm } from '../components/EmailForm';
@@ -34,27 +34,27 @@ export function Landing() {
           
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <div className="bg-gradient-to-br from-custom-indigo to-purple-700 rounded-2xl p-8 text-white shadow-xl">
+              <div className="bg-gradient-to-br from-deep-indigo to-purple-700 rounded-2xl p-8 text-white shadow-xl">
                 <div className="flex items-center space-x-4 mb-6">
-                  <div className="w-16 h-16 bg-custom-teal rounded-full flex items-center justify-center">
-                    <Target className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 bg-electric-teal rounded-full flex items-center justify-center">
+                    <BarChart3 className="w-8 h-8 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">Safe Training Ground</h3>
-                    <p className="text-blue-100">No real money at risk</p>
+                    <h3 className="text-xl font-bold font-poppins">Safe Training Ground</h3>
+                    <p className="text-blue-100 font-montserrat">No real money at risk</p>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-4 font-montserrat">
                   <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-custom-teal rounded-full"></div>
+                    <div className="w-2 h-2 bg-electric-teal rounded-full flex-shrink-0"></div>
                     <span>Fantasy portfolios with real market data</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-custom-teal rounded-full"></div>
+                    <div className="w-2 h-2 bg-electric-teal rounded-full flex-shrink-0"></div>
                     <span>Learn from mistakes without consequences</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-custom-teal rounded-full"></div>
+                    <div className="w-2 h-2 bg-electric-teal rounded-full flex-shrink-0"></div>
                     <span>Build confidence before investing real money</span>
                   </div>
                 </div>
@@ -82,50 +82,52 @@ export function Landing() {
             </h2>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* DraftDNA Quiz */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-custom-indigo rounded-full flex items-center justify-center mb-6">
-                <Target className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-deep-indigo rounded-full flex items-center justify-center mb-4">
+                <Target className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4 font-poppins">DraftDNA Quiz</h3>
-              <p className="text-gray-600 font-montserrat">Discover your inner investor personality</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">DraftDNA Quiz</h3>
+              <p className="text-gray-600 font-montserrat text-sm">Discover your inner investor personality</p>
             </div>
 
             {/* Fantasy Portfolio */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-custom-teal rounded-full flex items-center justify-center mb-6">
-                <TrendingUp className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-electric-teal rounded-full flex items-center justify-center mb-4">
+                <TrendingUp className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4 font-poppins">Fantasy Portfolio</h3>
-              <p className="text-gray-600 font-montserrat">Learn strategy and performance — without risk</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">Fantasy Portfolio</h3>
+              <p className="text-gray-600 font-montserrat text-sm">Learn strategy and performance — without risk</p>
             </div>
 
             {/* XP + Levels */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-              <div className="w-16 h-16 bg-custom-gold rounded-full flex items-center justify-center mb-6">
-                <Trophy className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-matte-gold rounded-full flex items-center justify-center mb-4">
+                <Trophy className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4 font-poppins">XP + Levels</h3>
-              <p className="text-gray-600 font-montserrat">Track your growth as an investor</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">XP + Levels</h3>
+              <p className="text-gray-600 font-montserrat text-sm">Track your growth as an investor</p>
             </div>
 
             {/* Leagues & DraftPoints */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow md:col-span-1 lg:col-span-1">
-              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mb-6">
-                <Users className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
+              <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mb-4">
+                <Users className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4 font-poppins">Leagues & DraftPoints</h3>
-              <p className="text-gray-600 font-montserrat">Stay competitive, social, and motivated</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">Leagues & DraftPoints</h3>
+              <p className="text-gray-600 font-montserrat text-sm">Stay competitive, social, and motivated</p>
             </div>
 
             {/* Weekly Reports */}
-            <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow md:col-span-1 lg:col-span-2">
-              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mb-6">
-                <FileText className="w-8 h-8 text-white" />
+            <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow md:col-span-2">
+              <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mb-4 mx-auto md:mx-0">
+                <FileText className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4 font-poppins">Weekly Reports</h3>
-              <p className="text-gray-600 font-montserrat">Understand your strengths and blindspots</p>
+              <div className="text-center md:text-left">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 font-poppins">Weekly Reports</h3>
+                <p className="text-gray-600 font-montserrat text-sm">Understand your strengths and blindspots</p>
+              </div>
             </div>
           </div>
         </div>
