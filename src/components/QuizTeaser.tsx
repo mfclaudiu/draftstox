@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface QuizTeaserProps {
@@ -6,6 +6,8 @@ interface QuizTeaserProps {
 }
 
 export function QuizTeaser({ onStartQuiz }: QuizTeaserProps) {
+  const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
+
   const sampleQuestions = [
     {
       question: "How do you feel when your investments lose value?",
@@ -21,6 +23,13 @@ export function QuizTeaser({ onStartQuiz }: QuizTeaserProps) {
     }
   ];
 
+  const handleOptionClick = (questionIndex: number, optionIndex: number) => {
+    setSelectedAnswers(prev => ({
+      ...prev,
+      [questionIndex]: optionIndex
+    }));
+  };
+
   return (
     <section className="py-16 lg:py-24 bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -34,26 +43,34 @@ export function QuizTeaser({ onStartQuiz }: QuizTeaserProps) {
         </motion.h2>
         
         <div className="space-y-8 mb-12">
-          {sampleQuestions.map((item, index) => (
+          {sampleQuestions.map((item, questionIndex) => (
             <motion.div
-              key={index}
+              key={questionIndex}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
+              transition={{ duration: 0.6, delay: questionIndex * 0.2 }}
               className="bg-gray-50 rounded-xl p-6 text-left"
             >
               <h3 className="font-poppins font-semibold text-lg text-gray-900 mb-4">
                 {item.question}
               </h3>
               <div className="grid sm:grid-cols-2 gap-3">
-                {item.options.map((option, optionIndex) => (
-                  <div
-                    key={optionIndex}
-                    className="bg-white rounded-lg p-3 border border-gray-200 hover:border-electric-teal hover:bg-electric-teal/5 transition-colors duration-200 cursor-pointer"
-                  >
-                    <span className="font-montserrat text-gray-700">{option}</span>
-                  </div>
-                ))}
+                {item.options.map((option, optionIndex) => {
+                  const isSelected = selectedAnswers[questionIndex] === optionIndex;
+                  return (
+                    <button
+                      key={optionIndex}
+                      onClick={() => handleOptionClick(questionIndex, optionIndex)}
+                      className={`text-left bg-white rounded-lg p-3 border transition-all duration-200 ${
+                        isSelected 
+                          ? 'border-electric-teal bg-electric-teal/10 shadow-sm' 
+                          : 'border-gray-200 hover:border-electric-teal hover:bg-electric-teal/5'
+                      }`}
+                    >
+                      <span className="font-montserrat text-gray-700">{option}</span>
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
           ))}

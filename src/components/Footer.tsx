@@ -34,11 +34,6 @@ export function Footer() {
             <Link to="/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>
-            <div className="flex space-x-4">
-              <span className="text-gray-500">Social:</span>
-              <a href="https://twitter.com/draftstox" className="hover:text-white transition-colors">Twitter</a>
-              <a href="https://linkedin.com/company/draftstox" className="hover:text-white transition-colors">LinkedIn</a>
-            </div>
           </div>
         </div>
       </div>

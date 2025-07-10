@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Hero } from '../components/Hero';
-import { HowItWorks } from '../components/HowItWorks';
 import { QuizTeaser } from '../components/QuizTeaser';
 import { EmailForm } from '../components/EmailForm';
 import { Footer } from '../components/Footer';
 import { SEOHead } from '../components/SEOHead';
-import { TrustSection } from '../components/TrustSection';
 
 // Why DraftStox Section Component
 function WhyDraftStox() {
@@ -126,7 +124,6 @@ export function Landing({ onNavigateToQuiz }: LandingProps) {
         <WhyDraftStox />
         <FeatureGrid />
         <QuizTeaser onStartQuiz={onNavigateToQuiz} />
-        <TrustSection />
         <EmailForm />
         <Footer />
       </div>
