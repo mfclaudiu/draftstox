@@ -1,37 +1,30 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { Landing } from './pages/Landing';
 import { QuizPage } from './pages/QuizPage';
 import { Dashboard } from './pages/Dashboard';
 import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { TermsOfService } from './pages/TermsOfService';
 import { QuizProvider } from './contexts/QuizContext';
-
-function AppContent() {
-  const navigate = useNavigate();
-
-  const handleStartQuiz = () => {
-    navigate('/quiz');
-  };
-
-  return (
-    <Routes>
-      <Route path="/" element={<Landing onStartQuiz={handleStartQuiz} />} />
-      <Route path="/quiz" element={<QuizPage />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<TermsOfService />} />
-    </Routes>
-  );
-}
+import { SEOHead } from './components/SEOHead';
 
 function App() {
   return (
-    <Router>
-      <QuizProvider>
-        <AppContent />
-      </QuizProvider>
-    </Router>
+    <HelmetProvider>
+      <Router>
+        <QuizProvider>
+          <SEOHead />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/quiz" element={<QuizPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
+          </Routes>
+        </QuizProvider>
+      </Router>
+    </HelmetProvider>
   );
 }
 

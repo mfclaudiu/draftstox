@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, TrendingUp, DollarSign, Award, X, ChevronRight, AlertCircle, Home } from 'lucide-react';
+import { Search, TrendingUp, DollarSign, Award, X, ChevronRight, AlertCircle, Home, Trophy, Target, Zap } from 'lucide-react';
 import { useMarketData } from '../hooks/useMarketData';
 import { Link, useNavigate } from 'react-router-dom';
 import { StockSearch } from '../components/StockSearch';
@@ -206,10 +206,17 @@ export function Dashboard() {
     setSelectedStock(stock);
   };
 
+  // Format number with commas
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(num);
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-gray-200">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link 
@@ -237,30 +244,41 @@ export function Dashboard() {
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Portfolio</h2>
-              <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-gray-900">${totalValue.toFixed(2)}</span>
-                <span className="text-gray-500">Available Cash: ${cash.toFixed(2)}</span>
+              <div className="flex items-baseline gap-4">
+                <span className="text-4xl font-bold text-gray-900">${formatNumber(totalValue)}</span>
+                <span className="text-gray-500">Available Cash: ${formatNumber(cash)}</span>
               </div>
             </div>
 
-            {/* Positions */}
+            {/* Positions with Enhanced Styling */}
             <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Positions</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
+                Your Positions
+              </h3>
               <div className="space-y-4">
-                {positions.map((position) => (
-                  <div key={position.symbol} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <h4 className="font-semibold text-gray-900">{position.symbol}</h4>
-                      <p className="text-sm text-gray-500">{position.shares} shares @ ${position.avgPrice.toFixed(2)}</p>
+                {positions.map((position) => {
+                  const gainLoss = (position.currentPrice - position.avgPrice) * position.shares;
+                  const gainLossPercent = ((position.currentPrice - position.avgPrice) / position.avgPrice) * 100;
+                  
+                  return (
+                    <div key={position.symbol} 
+                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 text-lg">{position.symbol}</h4>
+                        <p className="text-sm text-gray-500">
+                          {position.shares} shares @ ${formatNumber(position.avgPrice)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">${formatNumber(position.shares * position.currentPrice)}</p>
+                        <p className={`text-sm font-medium ${gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {gainLoss >= 0 ? '+' : ''}{formatNumber(gainLoss)} ({gainLossPercent.toFixed(2)}%)
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">${(position.shares * position.currentPrice).toFixed(2)}</p>
-                      <p className={`text-sm ${position.currentPrice > position.avgPrice ? 'text-green-600' : 'text-red-600'}`}>
-                        {((position.currentPrice - position.avgPrice) / position.avgPrice * 100).toFixed(2)}%
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -268,33 +286,60 @@ export function Dashboard() {
           {/* Experience and Challenges */}
           <div className="space-y-8">
             <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Experience</h3>
-              <div className="text-3xl font-bold text-gray-900 mb-2">Level {level}</div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${xpProgress}%` }}
-                />
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  Experience
+                </h3>
+                <span className="text-3xl font-bold text-blue-600">Level {level}</span>
               </div>
-              <p className="text-sm text-gray-500">{xp % xpForNextLevel} / {xpForNextLevel} XP</p>
+              <div className="relative">
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${xpProgress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{xp % xpForNextLevel} XP</span>
+                  <span>{xpForNextLevel} XP</span>
+                </div>
+              </div>
             </div>
 
             <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Challenges</h3>
-              <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2 mb-6">
+                <Target className="h-5 w-5 text-purple-500" />
+                Challenges
+              </h3>
+              <div className="space-y-6">
                 {challenges.map((challenge) => (
                   <div key={challenge.id} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-gray-900">{challenge.title}</h4>
-                      <span className="text-blue-600 font-semibold">{challenge.xpReward} XP</span>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium text-gray-900">{challenge.title}</h4>
+                        {challenge.completed && (
+                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Completed</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Zap className="h-4 w-4" />
+                        <span className="font-semibold">{challenge.xpReward} XP</span>
+                      </div>
                     </div>
                     <p className="text-sm text-gray-500">{challenge.description}</p>
                     {challenge.progress !== undefined && (
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(challenge.progress / challenge.total!) * 100}%` }}
-                        />
+                      <div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${(challenge.progress / challenge.total!) * 100}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-500">
+                          <span>{challenge.progress} / {challenge.total}</span>
+                          <span>{((challenge.progress / challenge.total!) * 100).toFixed(0)}%</span>
+                        </div>
                       </div>
                     )}
                   </div>

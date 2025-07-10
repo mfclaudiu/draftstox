@@ -1,27 +1,14 @@
+# Allow all crawlers
 User-agent: *
 Allow: /
 
-# Important pages
-Allow: /quiz
-Allow: /privacy
-Allow: /terms
-
 # Sitemap location
-Sitemap: https://draftstox.com/sitemap.xml
+Sitemap: https://draftstox.netlify.app/sitemap.xml
 
-# Crawl delay (optional - helps with server load)
-Crawl-delay: 1
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
 
-# Block admin/private areas (if any in future)
-# Disallow: /admin/
-# Disallow: /api/
-
-# Allow social media bots
-User-agent: facebookexternalhit
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: LinkedInBot
-Allow: / 
+# Crawl-delay for rate limiting
+Crawl-delay: 10 

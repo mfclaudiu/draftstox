@@ -1,24 +1,29 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { HowItWorks } from '../components/HowItWorks';
 import { QuizTeaser } from '../components/QuizTeaser';
 import { EmailForm } from '../components/EmailForm';
 import { Footer } from '../components/Footer';
+import { SEOHead } from '../components/SEOHead';
 
-interface LandingProps {
-  onStartQuiz: () => void;
-}
+export function Landing() {
+  const navigate = useNavigate();
+  const handleStartQuiz = () => navigate('/quiz');
 
-export function Landing({ onStartQuiz }: LandingProps) {
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead 
+        title="DraftStox - Learn Investing Through Fantasy Trading"
+        description="Master the stock market with our fantasy trading platform. Take the quiz, build your portfolio, and learn investing through play - no risk, all reward."
+        keywords="fantasy trading, stock market game, investment learning, portfolio simulator, stock quiz"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Hero onStartQuiz={onStartQuiz} />
+        <Hero onStartQuiz={handleStartQuiz} />
         <HowItWorks />
-        <QuizTeaser onStartQuiz={onStartQuiz} />
+        <QuizTeaser onStartQuiz={handleStartQuiz} />
         
         {/* Email Capture Section */}
         <section id="email-capture" className="py-20">

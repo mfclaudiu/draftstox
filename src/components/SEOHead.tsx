@@ -1,84 +1,84 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
 interface SEOHeadProps {
   title?: string;
   description?: string;
+  keywords?: string;
   image?: string;
   url?: string;
-  type?: 'website' | 'article';
-  noIndex?: boolean;
+  type?: string;
 }
 
-export function SEOHead({ 
-  title = 'DraftStox - Learn Investing Through Play',
-  description = 'Discover your investing archetype and master the market with fantasy-style portfolio building. No risk, all reward.',
-  image = '/og-image.png',
-  url = 'https://draftstox.com',
-  type = 'website',
-  noIndex = false 
+export function SEOHead({
+  title = 'DraftStox - Fantasy Stock Trading Game',
+  description = 'Learn investing through play with our fantasy stock trading platform. Build your portfolio, earn XP, and compete with others - no risk, all reward.',
+  keywords = 'fantasy trading, stock market game, investment learning, portfolio simulator',
+  image = '/og-image.jpg',
+  url = 'https://draftstox.netlify.app',
+  type = 'website'
 }: SEOHeadProps) {
-  
-  useEffect(() => {
-    // Update title
-    document.title = title;
-
-    // Helper function to update or create meta tags
-    const updateMetaTag = (property: string, content: string, isProperty = false) => {
-      const selector = isProperty ? `meta[property="${property}"]` : `meta[name="${property}"]`;
-      let meta = document.querySelector(selector) as HTMLMetaElement;
-      
-      if (!meta) {
-        meta = document.createElement('meta');
-        if (isProperty) {
-          meta.setAttribute('property', property);
-        } else {
-          meta.setAttribute('name', property);
-        }
-        document.head.appendChild(meta);
-      }
-      
-      meta.setAttribute('content', content);
-    };
-
-    // Basic meta tags
-    updateMetaTag('description', description);
-    updateMetaTag('keywords', 'investing, finance, education, quiz, archetype, portfolio, stocks, learning');
-    updateMetaTag('author', 'DraftStox');
-    
-    // Robots
-    if (noIndex) {
-      updateMetaTag('robots', 'noindex, nofollow');
-    } else {
-      updateMetaTag('robots', 'index, follow');
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'DraftStox',
+    description,
+    url,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    },
+    author: {
+      '@type': 'Organization',
+      name: 'DraftStox',
+      url
     }
+  };
 
-    // Open Graph tags
-    updateMetaTag('og:title', title, true);
-    updateMetaTag('og:description', description, true);
-    updateMetaTag('og:image', `${url}${image}`, true);
-    updateMetaTag('og:url', url, true);
-    updateMetaTag('og:type', type, true);
-    updateMetaTag('og:site_name', 'DraftStox', true);
+  return (
+    <Helmet>
+      {/* Basic Meta Tags */}
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
 
-    // Twitter Card tags
-    updateMetaTag('twitter:card', 'summary_large_image');
-    updateMetaTag('twitter:title', title);
-    updateMetaTag('twitter:description', description);
-    updateMetaTag('twitter:image', `${url}${image}`);
-    updateMetaTag('twitter:creator', '@draftstox');
+      {/* Open Graph / Facebook */}
+      <meta property="og:type" content={type} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={image} />
+      <meta property="og:url" content={url} />
+      <meta property="og:site_name" content="DraftStox" />
 
-    // Canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', url);
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
 
-  }, [title, description, image, url, type, noIndex]);
+      {/* Mobile Meta Tags */}
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <meta name="theme-color" content="#4F46E5" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  return null;
+      {/* Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
+
+      {/* PWA Tags */}
+      <link rel="manifest" href="/manifest.json" />
+      <link rel="apple-touch-icon" href="/icon-192x192.png" />
+
+      {/* Preconnect to External Resources */}
+      <link rel="preconnect" href="https://www.alphavantage.co" />
+      <link rel="preconnect" href="https://query1.finance.yahoo.com" />
+    </Helmet>
+  );
 }
 
 // Predefined SEO configurations for different pages
