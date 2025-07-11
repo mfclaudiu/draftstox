@@ -19,6 +19,15 @@ export function Hero({ onStartQuiz }: HeroProps) {
           Play the market before you pay the market.
         </motion.h1>
         
+        <motion.div 
+          className="font-montserrat text-lg sm:text-xl text-electric-teal mb-8 font-medium"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          Our Mission: "To gamify investing so more people can win."
+        </motion.div>
+        
         <motion.p 
           className="font-montserrat text-lg sm:text-xl lg:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed"
           initial={{ opacity: 0, y: 20 }}
